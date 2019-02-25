@@ -1,3 +1,4 @@
+#Andrew Kolkmeier
 #This code calculates the square of the number in arg and arg2
 
 	.data	
