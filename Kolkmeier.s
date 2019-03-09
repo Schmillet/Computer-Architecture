@@ -26,29 +26,7 @@ main:	#initialization
 		li $t6, 1
 
 loop_1: #main merge loop
-		sll  $t0, $s6, 2	#setting up list1 iterator
-		add  $t0, $t0, $s0
-		lw	 $t3, 0($t0) 	#address of list1[i]
-
-		sll  $t1, $s7, 2	#setting up the list2 iterator
-		add  $t1, $t1, $s2
-		lw   $t4, 0($t1)	#address of list2[i]
-
-		sll  $t2, $s8, 2 	#setting up combinedlist iterator
-		add  $t2, $t2, $s4
-		lw   $t5, 0($t2) 	#address of combinedlist[i]
-#loop_1:
-		beqz $s1, exit_1 	#while loop conditions
-		beqz $s3, exit_1
-		#1st if statement
-		bge  $t4, $t3, else_1 #if statement condition
-
-		move $t5, $t3		  #combinedlist[i] = list1[i]
-		subu $s1, $s1, $t6
-		addi $t3, 4
-
-		j first_if_exit		  #if statement exit
-
+		
 else_1: move $t5, $t4
 		subu $s3, $s3, $t6
 		addi $t4, 4
