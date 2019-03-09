@@ -22,31 +22,30 @@ main:	#initialization
 		move $s6, $zero 		#s6 is the list 1 iteration variable
 		move $s7, $zero 		#s7 is the list 2 iteration variable
 		move $s8, $zero 		#s8 is the combined list iteration variable
-
-		li $t6, 1
-
-loop_1: #main merge loop
 		
-else_1: move $t5, $t4
-		subu $s3, $s3, $t6
-		addi $t4, 4
-
-first_if_exit:
-		j loop_1
-
+ #main merge loop
+loop_1:
+		
 exit_1:
 
 loop_2:
 
 
 exit_2:
+
+
+loop_3:
+
+exit_3:
+
+		#$t9 is the index for the while loop, this makes sure that it is zero
 		addi $t9, $zero, 0
 print:
 		beq $t9, 32, print_exit
 
-		lw $t7, 0($s4)
+		lw $t7, 0($s4) #Address pointer to combined_list
 
-		addi $t9, $t9, 4
+		addi $t9, $t9, 4 #increments the index for the while loop
 
 		#prints current number
 		li $v0, 1
@@ -58,9 +57,9 @@ print:
 		la $a0, newLine
 		syscall
 
-		addi $s4, 4
+		addi $s4, 4 #increments address for combined_list
 
-		j print
+		j print #jumps back to top of loop
 
 print_exit:
 end:
