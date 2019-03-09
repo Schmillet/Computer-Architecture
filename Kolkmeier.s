@@ -20,11 +20,36 @@ main:	#initialization
 		add $s5, $s1, $s3		#stores the size of combined list in $s5
 
 		move $s6, $zero 		#s6 is the list 1 iteration variable
-		move $s7, $zero 		#s7 is the list 2 iteration variable
-		move $s8, $zero 		#s8 is the combined list iteration variable
+		move $s7, $zero 		#s7 is the list 2 iteration variable	
+		move $s8, $zero			#s8 is the combined list iterator
 		
  #main merge loop
 loop_1:
+		beq $s6, 16, exit_1 	#while loop conditions
+		beq $s7, 16, exit_1
+
+		lw $t0, 0($s0)			#address pointer to list 1
+		
+
+		lw $t1, 0($s2)			#address pointer to list 2
+		
+
+		lw $t2, 0($s4)			#address pointer to list 3
+
+		bge $t1, $t0, first_else	#If statement condition
+		sw $t2, 0($s0)
+		addi $s6, $s6, 4		#increments list 1 iterator
+		addi $s0, $s0, 4		#Increments list 1 address
+		j First_if_exit
+
+first_else: sw $t2, 0($s2)
+			addi, $s7, $s7, 4
+			addi, $s2, $s2, 4
+First_if_exit:
+		
+		addi $s4, $s4, 0		#increments the combined_list address
+
+		j exit_1
 		
 exit_1:
 
@@ -37,7 +62,7 @@ exit_2:
 loop_3:
 
 exit_3:
-
+		sub $s4, $s4, 32
 		#$t9 is the index for the while loop, this makes sure that it is zero
 		addi $t9, $zero, 0
 print:
