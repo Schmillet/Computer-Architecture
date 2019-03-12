@@ -7,9 +7,7 @@
 	.data
 newLine: 		.asciiz " "
 list1:			.word 1, 2, 5, 8
-list1_size: 	.word 4
 list2: 			.word 3, 4, 6, 7
-list2_size:		.word 4
 combined_list:  .word 0, 0, 0, 0, 0, 0, 0, 0
 
 
@@ -18,9 +16,9 @@ combined_list:  .word 0, 0, 0, 0, 0, 0, 0, 0
 
 main:	#initialization
 		la $s0, list1 				#stores address of list 1 $s0
-		lw $s1, list1_size 			#stores size of list 1 $s1
+		li $s1, 4 					#stores size of list 1 $s1
 		la $s2, list2 				#stores address of list 2 in $s2
-		lw $s3, list2_size			#stores size of list 2 $s3
+		li $s3, 4					#stores size of list 2 $s3
 		la $s4, combined_list 		#stores the address of the combined list in $s4
 		add $s5, $s1, $s3			#stores the size of combined list in $s5
 
