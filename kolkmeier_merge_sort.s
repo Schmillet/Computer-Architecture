@@ -8,7 +8,7 @@
 list: .word 6, 5, 9, 1, 7, 0, -3, 2		#Unsorted List, Must be length of 2^n, max length 32
 merge1: .space 16	#Allocates 16 spaces to use for the merge sort
 merge2: .space 16	#allocates 16 spaces to use for the merge sort
-workList: .space 32
+workList: .space 32	#allocates 32 spaces to use in the merge sort
 
 	.text
 	.globl main
@@ -27,13 +27,24 @@ main:
 
 		sll $t3, $s1, 2				#length of merge1 times four
 		sll $t4, $s3, 2				#length of merge2 times four
-		sll $t5, $s5, 2				#length of list times four
+		sll $t5, $s5, 2				#length of list and workList times four
+
+		li $s8, 1					#used to increment the initLoop inside the sort loops
 
 #This begins the process for the merge sort
 outerLoop:
-		bgt $s1, $s5, outerLoopExit
-		
+		beq $s1, $t5, outerLoopExit
+innerLoop:
+		blz $s5, innerLoopExit
+initLoop:
+		bgt $s8, $s1, initLoopExit
+		lw $t8, 0($s4)				#loads the first word from list into $t8
+		sw $t8, 0($s0)				#stores the first word from list into merge1 to be used in the merge subroutine
+		sw $t8, 4($s2)				#stores the next word from list into merge2 to be used in the merge subroutine
+		addi $s4, 4					#increments the list address to access next word
+initLoopExit:
 
+innerLoopExit:
 		sll $s1, $s1, 1
 		j outerLoop
 outerLoopExit:
@@ -43,6 +54,7 @@ end:
 		li $v0, 10
 		syscall
 
+#MERGE SUBROUTINE START#
 mergeRoutine:
 		beq $s6, $t3, exit_1 		#while loop conditions
 		beq $s7, $t4, exit_1
@@ -96,3 +108,6 @@ loop_3:
 
 exit_3:
 		jr $ra
+
+#LIST COPY SUBROUTINE#
+listCopy:
