@@ -30,27 +30,61 @@ main:
 		sll $t3, $s1, 2				#length of merge1 times four
 		sll $t5, $s5, 2				#length of list and workList times four
 
-		move $s8, $s1				#used to increment the initLoop inside the sort loops
+		move $s8, $s1				#used to increment the merge1Loop
+		move $t4, $s1				#used to increment the merge2Loop
+		move $t7, $s1
 
 #This begins the process for the merge sort
 outerLoop:
-		beq $s1, $t5, outerLoopExit
+		beq $s1, $s5, outerLoopExit
 innerLoop:
-		beq $s8, $s5, innerLoopExit
+		bgt $t7, $s5, innerLoopExit
+		move $s6, $zero
+		move $s7, $zero
+		la $s0, merge1
+		la $s2, merge2
 
+#these two loops load the correct values into merge1 and merge2
+merge1Loop:
+		bgt $s8, $s1, merge1LoopExit
+		lw $t8, 0($s3)				#loads the first word from list into $t8
+		sw $t8, 0($s0)				#stores the first word from list into merge1 to be used in the merge subroutine
+		addi $s3, 4					#increments the list address to access next set of words
+		addi $s0, 4					#increments the merge1 address
+		sll $s8, $s8, 1
+		j merge1Loop
+merge1LoopExit:
+
+merge2Loop:
+		bgt $t4, $s1, merge2LoopExit
+		lw $t8, 0($s3)
+		sw $t8, 0($s2)
+		addi $s3, 4
+		addi $s2, 4
+		sll $t4, $t4, 1
+		j merge2Loop
+merge2LoopExit:
+
+		move $s8, $s1
+		move $t4, $s1
+		la $s0, merge1
+		la $s2, merge2
 		jal mergeRoutine
-		sll $s8, $s8, 1				#increments the innerLoop index
+		sll $t7, $t7, 1				#increments the innerLoop index
 		j innerLoop
 
 innerLoopExit:
 		sll $s1, $s1, 1				#increases the length of both merge1 and merge2
-		jal copyList				#copies workList into list
+		la $s0, merge1 				#resets the merge1 address
+		la $s2, merge2 				#resets the merge2 address
+		jal listCopy				#copies workList into list
 		j outerLoop
 
 outerLoopExit:
 
 		move $t7, $zero				#sets $t7 to zero to be used as an address pointer in print
 		move $t9, $zero				#sets $t9 to zero to be used as the loop index for print
+		sub $s4, $s4, $t5
 
 print:
 		beq $t9, $t5, print_exit
@@ -84,22 +118,24 @@ mergeRoutine:
 		beq $s6, $t3, exit_1 		#while loop conditions
 		beq $s7, $t3, exit_1
 
+		
+
 		lw $t0, 0($s0)				#address pointer to merge1
 		lw $t1, 0($s2)				#address pointer to merge2
 
 		bge $t1, $t0, first_else	#if statement condition
-		sw $t1, 0($s4)				#stores value of merge2 in workList
+		sw $t1, 0($t2)				#stores value of merge2 in workList
 		addi $s7 $s7, 4				#increments merge2 iterator
 		addi $s2 $s2, 4				#Increments merge2 address
 		j First_if_exit
 
 first_else: 
-		sw $t0, 0($s4)				#Stores value of merge1 into workList
+		sw $t0, 0($t2)				#Stores value of merge1 into workList
 		addi $s6, $s6, 4			#increments merge1 iterator
 		addi $s0, $s0, 4			#increments merge1 address
 First_if_exit:
 		
-		addi $s4, $s4, 4			#increments the workList address
+		addi $t2, $t2, 4			#increments the workList address
 
 		j mergeRoutine
 		
@@ -108,12 +144,12 @@ exit_1:
 loop_2:
 		beq $s6, $t3, exit_2		#Exit loop if merge1 is empty
 
-		sw $t0, 0($s4)				#stores remaining value into workList
+		sw $t0, 0($t2)				#stores remaining value into workList
 
 		addi $s6, $s6, 4			#increments merge1 iterator
 		addi $s0, $s0, 4			#increments merge1 address
 
-		addi $s4, $s4, 4			#increments the workList address
+		addi $t2, $t2, 4			#increments the workList address
 
 		j loop_2
 
@@ -122,12 +158,12 @@ exit_2:
 loop_3:
 		beq $s7, $t3, exit_3		#Exit loop if merge2 is empty
 
-		sw $t1, 0($s4)				#stores remaining value into workList
+		sw $t1, 0($t2)				#stores remaining value into workList
 
 		addi $s7, $s7, 4			#increments merge2 increment
 		addi $s2, $s2, 4			#increments merge2 address
 
-		addi $s4, $s4, 4			#increments the workList address
+		addi $t2, $t2, 4			#increments the workList address
 
 		j loop_3
 
@@ -136,7 +172,7 @@ exit_3:
 
 #LIST COPY SUBROUTINE#
 listCopy:
-		sub $sp, $sa, 16			#makes space for five items on stack
+		sub $sp, $sp, 16			#makes space for five items on stack
 		sw $s4, 0($sp)				#stores list address in the stack
 		sw $t2, 4($sp)				#stores workList address in the stack
 		sw $s1, 8($sp)				#stores merge length into the stack
