@@ -32,7 +32,7 @@ main:
 
 		move $s8, $s1				#used to increment the merge1Loop
 		move $t4, $s1				#used to increment the merge2Loop
-		move $t7, $s1
+		move $t7, $s1				#used to increment the inner merge sort loop
 
 #This begins the process for the merge sort
 outerLoop:
@@ -51,24 +51,24 @@ merge1Loop:
 		sw $t8, 0($s0)				#stores the first word from list into merge1 to be used in the merge subroutine
 		addi $s3, 4					#increments the list address to access next set of words
 		addi $s0, 4					#increments the merge1 address
-		sll $s8, $s8, 1
+		sll $s8, $s8, 1				#increments the loop counter
 		j merge1Loop
 merge1LoopExit:
 
 merge2Loop:
 		bgt $t4, $s1, merge2LoopExit
-		lw $t8, 0($s3)
-		sw $t8, 0($s2)
-		addi $s3, 4
-		addi $s2, 4
-		sll $t4, $t4, 1
+		lw $t8, 0($s3)				#loads the next word from list into $t8
+		sw $t8, 0($s2)				#stores word from $t8 into workList
+		addi $s3, 4					#increments the list address
+		addi $s2, 4					#increments the merge2 address
+		sll $t4, $t4, 1				#increments the loop counter
 		j merge2Loop
 merge2LoopExit:
 
-		move $s8, $s1
-		move $t4, $s1
-		la $s0, merge1
-		la $s2, merge2
+		move $s8, $s1				#resets the merge1 increment
+		move $t4, $s1				#resets the merge2 increment
+		la $s0, merge1 				#resets the merge1 address
+		la $s2, merge2 				#resets the merge2 address
 		jal mergeRoutine
 		sll $t7, $t7, 1				#increments the innerLoop index
 		j innerLoop
