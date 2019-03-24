@@ -32,17 +32,25 @@ main:
 
 		move $s8, $s1				#used to increment the merge1Loop
 		move $t4, $s1				#used to increment the merge2Loop
-		move $t7, $s1				#used to increment the inner merge sort loop
+		li $t7, 0				#used to increment the inner merge sort loop
 
 #This begins the process for the merge sort
 outerLoop:
 		beq $s1, $s5, outerLoopExit
+		sll $t9, $s1, 1
+		la $s3, list 				#resets the list address copy
+		li $t4, 1					#resets $t4. DO NOT TOUCH
+		sll $t3, $s1, 2				#length of merge1 times four
+		la $s4, list 				#resets list address
+		#la $t2, workList 			#resets the workList address
 innerLoop:
 		bgt $t7, $s5, innerLoopExit
-		move $s6, $zero
-		move $s7, $zero
-		la $s0, merge1
-		la $s2, merge2
+		move $s6, $zero				#resets merge1 counter
+		move $s7, $zero				#resets merge2 counter
+		la $s0, merge1 				#resets merge1 address
+		la $s2, merge2 				#resets merge2 address
+		li $s8, 1					#resets merge1 loop counter
+		li $t4, 1					#resets merge2 loop counter
 
 #these two loops load the correct values into merge1 and merge2
 merge1Loop:
@@ -70,7 +78,7 @@ merge2LoopExit:
 		la $s0, merge1 				#resets the merge1 address
 		la $s2, merge2 				#resets the merge2 address
 		jal mergeRoutine
-		sll $t7, $t7, 1				#increments the innerLoop index
+		add $t7, $t7, $s1			#increments the innerLoop index
 		j innerLoop
 
 innerLoopExit:
