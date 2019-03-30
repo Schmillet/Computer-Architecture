@@ -15,9 +15,11 @@ workList: .space 32	#allocates 32 spaces to use for the merge sort
 	.globl main
 #initialization
 main:
+setup:
 		la $s4, list 				#stores the address of the list into $s4
 		la $s3, list 				#also stores address of list for initLoop
 		li $s5, 8					#stores the length of list
+		li $t9, 8					#makes a copy of the list length
 		la $s0, merge1 				#stores address of merge1 into $s0
 		li $s1, 1 					#sets length counter to one for merge1 and merge2
 		la $s2, merge2 				#stores address of merge into $s2
@@ -30,55 +32,55 @@ main:
 		sll $t3, $s1, 2				#length of merge1 times four
 		sll $t5, $s5, 2				#length of list and workList times four
 
-		move $s8, $s1				#used to increment the merge1Loop
-		move $t4, $s1				#used to increment the merge2Loop
-		li $t7, 0				#used to increment the inner merge sort loop
+		move $s8, $zero				#used to increment the merge1Loop
+		move $t4, $zero				#used to increment the merge2Loop
+		sra $t7, $t9, 1				#used to increment the inner merge sort loop
 
 #This begins the process for the merge sort
 outerLoop:
 		beq $s1, $s5, outerLoopExit
-		sll $t9, $s1, 1
 		la $s3, list 				#resets the list address copy
-		li $t4, 1					#resets $t4. DO NOT TOUCH
-		sll $t3, $s1, 2				#length of merge1 times four
+		li $t4, 0					#resets $t4. DO NOT TOUCH
+		sll $t3, $s1, 2				#length of merge1 times four, used in merge subroutine
 		la $s4, list 				#resets list address
-		#la $t2, workList 			#resets the workList address
+		sra $t7, $t9, 1				#resets inner loop index
+		la $t2, workList 			#resets the workList address
+
 innerLoop:
-		bgt $t7, $s5, innerLoopExit
+		beq $t7, $t9, innerLoopExit
 		move $s6, $zero				#resets merge1 counter
 		move $s7, $zero				#resets merge2 counter
 		la $s0, merge1 				#resets merge1 address
 		la $s2, merge2 				#resets merge2 address
-		li $s8, 1					#resets merge1 loop counter
-		li $t4, 1					#resets merge2 loop counter
 
 #these two loops load the correct values into merge1 and merge2
 merge1Loop:
-		bgt $s8, $s1, merge1LoopExit
+		beq $s8, $s1, merge1LoopExit
 		lw $t8, 0($s3)				#loads the first word from list into $t8
 		sw $t8, 0($s0)				#stores the first word from list into merge1 to be used in the merge subroutine
 		addi $s3, 4					#increments the list address to access next set of words
 		addi $s0, 4					#increments the merge1 address
-		sll $s8, $s8, 1				#increments the loop counter
+		addi $s8, $s8, 1			#increments the loop counter
 		j merge1Loop
+
 merge1LoopExit:
+		li $s8, 0					#resets merge1 loop counter
 
 merge2Loop:
-		bgt $t4, $s1, merge2LoopExit
+		beq $t4, $s1, merge2LoopExit
 		lw $t8, 0($s3)				#loads the next word from list into $t8
 		sw $t8, 0($s2)				#stores word from $t8 into workList
 		addi $s3, 4					#increments the list address
 		addi $s2, 4					#increments the merge2 address
-		sll $t4, $t4, 1				#increments the loop counter
+		addi $t4, $t4, 1			#increments the loop counter
 		j merge2Loop
-merge2LoopExit:
 
-		move $s8, $s1				#resets the merge1 increment
-		move $t4, $s1				#resets the merge2 increment
+merge2LoopExit:
+		li $t4, 0					#resets merge2 loop counter
 		la $s0, merge1 				#resets the merge1 address
 		la $s2, merge2 				#resets the merge2 address
 		jal mergeRoutine
-		add $t7, $t7, $s1			#increments the innerLoop index
+		addi $t7, $t7, 1			#increments the innerLoop index
 		j innerLoop
 
 innerLoopExit:
@@ -86,6 +88,7 @@ innerLoopExit:
 		la $s0, merge1 				#resets the merge1 address
 		la $s2, merge2 				#resets the merge2 address
 		jal listCopy				#copies workList into list
+		sra $t9, $t9, 1				#halves the length of the copy of list used for innerLoop condition 
 		j outerLoop
 
 outerLoopExit:
@@ -121,7 +124,7 @@ end:
 		li $v0, 10
 		syscall
 
-#MERGE SUBROUTINE START#
+#-----------------------------MERGE SUBROUTINE START----------------------------#
 mergeRoutine:
 		beq $s6, $t3, exit_1 		#while loop conditions
 		beq $s7, $t3, exit_1
@@ -178,7 +181,7 @@ loop_3:
 exit_3:
 		jr $ra 						#jumps back to where jal mergeRoutine was called
 
-#LIST COPY SUBROUTINE#
+#-----------------------------------LIST COPY SUBROUTINE---------------------------#
 listCopy:
 		sub $sp, $sp, 16			#makes space for five items on stack
 		sw $s4, 0($sp)				#stores list address in the stack
