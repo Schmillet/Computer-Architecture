@@ -1,25 +1,55 @@
 #Andrew Kolkmeier
 #This program demonstrates a merge sort
-#User must enter the unsorted list into the list label
-#and the length of the list into the li $s5, (length)
-#command
+#User must enter every value of list separately
 
 	.data
-space: 		.asciiz " "
-list: .word 6, 5, 9, 1, 7, 0, -3, 2		#Unsorted List, Must be length of 2^n, max length 32
-merge1: .space 16	#Allocates 16 spaces to use for the merge sort
-merge2: .space 16	#allocates 16 spaces to use for the merge sort
-workList: .space 32	#allocates 32 spaces to use for the merge sort
+list: .space 128		#Unsorted List, Must be even number, max length 32
+listLength: .space 8	#stores length of list entered by user
+merge1: .space 64	#Allocates 16 spaces to use for the merge sort
+merge2: .space 64	#allocates 16 spaces to use for the merge sort
+workList: .space 128	#allocates 32 spaces to use for the merge sort
+space: .asciiz " "
+prompt1: .asciiz "Enter the length of the list to be sorted(must be even number, 32 or under): "
+prompt2: .asciiz "Enter the list value: "
 
 	.text
 	.globl main
 #initialization
 main:
+keyboard:
+        li $s6, 0                   #input loop index
+        la $s7, list                #loads address of list into $s7
+
+        li $v0, 4                   #print string       
+        la $a0, prompt1             #prints prompt for length of list
+        syscall
+
+        li $v0, 5                   #read int
+        syscall
+        sw $v0, listLength          #stores length into listLength
+
+        lw $s5, listLength          #loads the length of list into $s5
+
+        
+
+keyboardLoop:
+        beq $s6, $s5, setup
+        li $v0, 4                   #print string
+        la $a0, prompt2             #prints prompt for list contents
+        syscall
+        li $v0, 5                   #read int
+        syscall
+        sw $v0, 0($s7)              #stores int into list
+        addi $s6, $s6, 1            #incrememts loop index
+        addi $s7, $s7, 4            #increments list address
+        j keyboardLoop
+
+		
 setup:
 		la $s4, list 				#stores the address of the list into $s4
 		la $s3, list 				#also stores address of list for initLoop
-		li $s5, 8					#stores the length of list
-		li $t9, 8					#makes a copy of the list length
+		lw $s5, listLength			#stores the length of list
+		move $t9, $s5				#makes a copy of the list length
 		la $s0, merge1 				#stores address of merge1 into $s0
 		li $s1, 1 					#sets length counter to one for merge1 and merge2
 		la $s2, merge2 				#stores address of merge into $s2
@@ -155,6 +185,7 @@ exit_1:
 loop_2:
 		beq $s6, $t3, exit_2		#Exit loop if merge1 is empty
 
+		lw $t0, 0($s0)				#loads next value of merge1
 		sw $t0, 0($t2)				#stores remaining value into workList
 
 		addi $s6, $s6, 4			#increments merge1 iterator
@@ -169,6 +200,7 @@ exit_2:
 loop_3:
 		beq $s7, $t3, exit_3		#Exit loop if merge2 is empty
 
+		lw $t1, 0($s2)				#loads next value of merge2
 		sw $t1, 0($t2)				#stores remaining value into workList
 
 		addi $s7, $s7, 4			#increments merge2 increment
