@@ -1,5 +1,3 @@
 # Computer-Architecture
-Andrew Kolkmeier: 
-ask170003@utdallas.edu
 
-All of my assembly code written while at UT Dallas
+Collection of MIPS-32 bit assembly code written while attending The University of Texas at Dallas in 2019
